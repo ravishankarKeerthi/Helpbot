@@ -40,7 +40,7 @@ def search_help(query):
 
 
 @frappe.whitelist()
-def get_official_docs_search_url(query):
+def  @frappe.whitelist() def get_official_docs_search_url(query): import urllib.parse safe_query = urllib.parse.quote(f"site:docs.erpnext.com {query or ''}") return f"https://www.google.com/search?q={safe_query}"(query):
 	"""Builds a direct search URL into ERPNext's official docs site as a fallback."""
 	import urllib.parse
 
