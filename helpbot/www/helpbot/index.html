@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8">
+	<title>Help / Docbot</title>
+	<link rel="stylesheet" href="/assets/helpbot/css/helpbot.css">
+	<style>
+		body { font-family: Arial, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 16px; }
+		h2 { color: #16404D; }
+		#page-input {
+			width: 100%; padding: 12px 14px; font-size: 15px;
+			border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box;
+			margin-bottom: 16px;
+		}
+		#page-results .helpbot-result { font-size: 14px; padding: 14px; margin-bottom: 10px; }
+	</style>
+</head>
+<body>
+	<h2>Ask Docbot</h2>
+	<p>Search internal workflow steps or ERPNext official documentation references.</p>
+	<input type="text" id="page-input" placeholder="e.g. how to create a sales invoice, GST setup, leave approval..." />
+	<div id="page-results"></div>
+
+	<script src="/assets/frappe/js/lib/jquery/jquery.min.js"></script>
+	<script>
+		let debounceTimer;
+		const input = document.getElementById("page-input");
+		const results = document.getElementById("page-results");
+
+		input.addEventListener("input", () => {
+			clearTimeout(debounceTimer);
+			const q = input.value.trim();
+			if (q.length < 2) { results.innerHTML = ""; return; }
+			debounceTimer = setTimeout(() => search(q), 350);
+		});
+
+		function search(query) {
+			results.innerHTML = "<p>Searching...</p>";
+			fetch("/api/method/helpbot.api.search_help?query=" + encodeURIComponent(query))
+				.then(r => r.json())
+				.then(data => render(data.message || [], query));
+		}
+
+		function render(matches, query) {
+			if (!matches.length) {
+				fetch("/api/method/helpbot.api.get_official_docs_search_url?query=" + encodeURIComponent(query))
+					.then(r => r.json())
+					.then(data => {
+						results.innerHTML = `<p>No internal article found.
+							<a href="${data.message}" target="_blank">Search ERPNext official docs &rarr;</a></p>`;
+					});
+				return;
+			}
+			results.innerHTML = matches.map(m => {
+				const badge = m.is_official_erpnext_doc
+					? '<span class="helpbot-badge official">Official Docs</span>'
+					: '<span class="helpbot-badge internal">Internal</span>';
+				const link = m.reference_url
+					? `<a href="${m.reference_url}" target="_blank">Open reference &rarr;</a>` : "";
+				const preview = (m.content || "").replace(/<[^>]*>/g, "").slice(0, 300);
+				return `<div class="helpbot-result">
+					<div class="helpbot-result-title"><b>${m.title}</b> ${badge}</div>
+					<div class="helpbot-result-module">${m.module || ""}</div>
+					<div class="helpbot-result-preview">${preview}...</div>
+					${link}
+				</div>`;
+			}).join("");
+		}
+	</script>
+</body>
+</html>

@@ -1,0 +1,335 @@
+/* Helpbot - advanced chat UI */
+
+#helpbot-bubble {
+	position: fixed;
+	bottom: 24px;
+	right: 24px;
+	width: 58px;
+	height: 58px;
+	border-radius: 50%;
+	background: linear-gradient(135deg, #17a2b8, #16404D);
+	color: white;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 24px;
+	cursor: pointer;
+	box-shadow: 0 6px 18px rgba(22, 64, 77, 0.4);
+	z-index: 9999;
+	transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+#helpbot-bubble:hover {
+	transform: scale(1.08);
+}
+
+#helpbot-bubble.helpbot-bubble-hidden {
+	transform: scale(0);
+	opacity: 0;
+	pointer-events: none;
+}
+
+#helpbot-panel {
+	position: fixed;
+	bottom: 24px;
+	right: 24px;
+	width: 360px;
+	height: 520px;
+	background: #f7f9fa;
+	border-radius: 16px;
+	box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+	z-index: 9999;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	font-family: inherit;
+	transform: translateY(20px) scale(0.96);
+	opacity: 0;
+	pointer-events: none;
+	transition: transform 0.25s cubic-bezier(.2,.8,.2,1), opacity 0.2s ease;
+}
+
+#helpbot-panel.helpbot-open {
+	transform: translateY(0) scale(1);
+	opacity: 1;
+	pointer-events: auto;
+}
+
+#helpbot-header {
+	background: linear-gradient(135deg, #16404D, #17a2b8);
+	color: white;
+	padding: 14px 16px;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.helpbot-avatar {
+	width: 36px;
+	height: 36px;
+	border-radius: 50%;
+	background: rgba(255,255,255,0.2);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 700;
+	font-size: 13px;
+	flex-shrink: 0;
+}
+
+.helpbot-header-text {
+	flex: 1;
+	line-height: 1.3;
+}
+
+.helpbot-title {
+	font-weight: 700;
+	font-size: 14.5px;
+}
+
+.helpbot-subtitle {
+	font-size: 11px;
+	opacity: 0.85;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.helpbot-status-dot {
+	width: 7px;
+	height: 7px;
+	border-radius: 50%;
+	background: #4ade80;
+	display: inline-block;
+}
+
+#helpbot-close {
+	cursor: pointer;
+	font-size: 20px;
+	opacity: 0.85;
+	padding: 0 2px;
+}
+
+#helpbot-close:hover {
+	opacity: 1;
+}
+
+#helpbot-messages {
+	flex: 1;
+	overflow-y: auto;
+	padding: 14px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+.helpbot-msg {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	animation: helpbot-fade-in 0.25s ease;
+	max-width: 90%;
+}
+
+.helpbot-msg-user {
+	align-self: flex-end;
+	flex-direction: row-reverse;
+}
+
+.helpbot-msg-bot {
+	align-self: flex-start;
+}
+
+.helpbot-avatar-sm {
+	width: 24px;
+	height: 24px;
+	border-radius: 50%;
+	background: #16404D;
+	color: white;
+	font-size: 9px;
+	font-weight: 700;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	margin-top: 2px;
+}
+
+.helpbot-bubble-text {
+	background: white;
+	border-radius: 12px;
+	padding: 9px 12px;
+	font-size: 13px;
+	line-height: 1.45;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+	color: #222;
+}
+
+.helpbot-msg-user .helpbot-bubble-text {
+	background: linear-gradient(135deg, #17a2b8, #16404D);
+	color: white;
+	border-bottom-right-radius: 3px;
+}
+
+.helpbot-msg-bot .helpbot-bubble-text {
+	border-bottom-left-radius: 3px;
+}
+
+.helpbot-chips {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	margin-top: 8px;
+}
+
+.helpbot-chip {
+	background: #eaf6f8;
+	color: #147990;
+	border: 1px solid #cdeaef;
+	border-radius: 14px;
+	padding: 5px 10px;
+	font-size: 11.5px;
+	cursor: pointer;
+	transition: background 0.15s ease;
+}
+
+.helpbot-chip:hover {
+	background: #d5eef2;
+}
+
+.helpbot-cards {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.helpbot-card {
+	border: 1px solid #e5e5e5;
+	border-radius: 10px;
+	padding: 9px 11px;
+	background: #fcfcfc;
+}
+
+.helpbot-card-title {
+	font-weight: 700;
+	font-size: 12.5px;
+	margin-bottom: 2px;
+}
+
+.helpbot-card-module {
+	color: #999;
+	font-size: 10.5px;
+	margin-bottom: 4px;
+}
+
+.helpbot-card-preview {
+	color: #444;
+	font-size: 12px;
+	margin-bottom: 5px;
+}
+
+.helpbot-card-link, .helpbot-external-link {
+	font-size: 11.5px;
+	color: #17a2b8;
+	font-weight: 600;
+	text-decoration: none;
+	display: inline-block;
+	margin-top: 2px;
+}
+
+.helpbot-badge {
+	display: inline-block;
+	font-size: 9.5px;
+	padding: 1px 7px;
+	border-radius: 10px;
+	margin-left: 5px;
+	vertical-align: middle;
+	font-weight: 600;
+}
+
+.helpbot-badge.official {
+	background: #e0f3f7;
+	color: #147990;
+}
+
+.helpbot-badge.internal {
+	background: #eef1e6;
+	color: #5a6b3f;
+}
+
+.helpbot-typing-dots {
+	display: flex;
+	gap: 4px;
+	padding: 12px 14px;
+}
+
+.helpbot-typing-dots span {
+	width: 6px;
+	height: 6px;
+	border-radius: 50%;
+	background: #b7c2c5;
+	animation: helpbot-bounce 1.2s infinite ease-in-out;
+}
+
+.helpbot-typing-dots span:nth-child(2) { animation-delay: 0.15s; }
+.helpbot-typing-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+#helpbot-inputbar {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 10px;
+	background: white;
+	border-top: 1px solid #eee;
+}
+
+#helpbot-input {
+	flex: 1;
+	padding: 9px 12px;
+	border: 1px solid #ddd;
+	border-radius: 20px;
+	font-size: 13px;
+	outline: none;
+	box-sizing: border-box;
+}
+
+#helpbot-input:focus {
+	border-color: #17a2b8;
+}
+
+#helpbot-send {
+	width: 34px;
+	height: 34px;
+	border-radius: 50%;
+	border: none;
+	background: linear-gradient(135deg, #17a2b8, #16404D);
+	color: white;
+	font-size: 13px;
+	cursor: pointer;
+	flex-shrink: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+#helpbot-send:hover {
+	opacity: 0.9;
+}
+
+@keyframes helpbot-fade-in {
+	from { opacity: 0; transform: translateY(6px); }
+	to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes helpbot-bounce {
+	0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+	30% { transform: translateY(-4px); opacity: 1; }
+}
+
+@media (max-width: 420px) {
+	#helpbot-panel {
+		width: 92vw;
+		right: 4vw;
+		height: 70vh;
+	}
+}
