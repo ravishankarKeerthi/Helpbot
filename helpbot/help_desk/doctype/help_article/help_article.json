@@ -13,7 +13,9 @@
   "keywords",
   "reference_url",
   "is_official_erpnext_doc",
+  "error_message",
   "section_break_1",
+  "root_cause",
   "content"
  ],
  "fields": [
@@ -30,7 +32,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Category",
-   "options": "Internal Workflow\nERPNext Official Reference\nFAQ\nTroubleshooting",
+   "options": "Internal Workflow\nERPNext Official Reference\nFAQ\nTroubleshooting\nError Resolution",
    "reqd": 1
   },
   {
@@ -63,11 +65,26 @@
    "label": "Points to Official ERPNext Docs"
   },
   {
+   "depends_on": "eval:doc.category=='Error Resolution'",
+   "description": "Paste the exact error text/code shown to the user, e.g. 'Duplicate entry for Item Code'",
+   "fieldname": "error_message",
+   "fieldtype": "Small Text",
+   "label": "Exact Error Message"
+  },
+  {
    "fieldname": "section_break_1",
    "fieldtype": "Section Break",
    "label": "Answer / Instructions"
   },
   {
+   "depends_on": "eval:doc.category=='Error Resolution'",
+   "description": "What actually causes this error (e.g. duplicate naming series, missing permission, wrong account type)",
+   "fieldname": "root_cause",
+   "fieldtype": "Small Text",
+   "label": "Likely Root Cause"
+  },
+  {
+   "description": "Step-by-step resolution / troubleshooting guidance",
    "fieldname": "content",
    "fieldtype": "Text Editor",
    "label": "Content"
