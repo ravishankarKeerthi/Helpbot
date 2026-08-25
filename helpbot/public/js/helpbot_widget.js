@@ -8,6 +8,7 @@ frappe.after_ajax(() => {
 		"Leave approval process",
 		"GST setup",
 		"Stock reconciliation",
+		"I'm getting an error",
 	];
 
 	// Floating bubble
@@ -154,18 +155,24 @@ frappe.after_ajax(() => {
 
 		const cardsHtml = matches
 			.map((m) => {
-				const badge = m.is_official_erpnext_doc
-					? `<span class="helpbot-badge official">Official Docs</span>`
-					: `<span class="helpbot-badge internal">Internal</span>`;
+				const badge = m.category === "Error Resolution"
+					? `<span class="helpbot-badge error">Error Fix</span>`
+					: m.is_official_erpnext_doc
+						? `<span class="helpbot-badge official">Official Docs</span>`
+						: `<span class="helpbot-badge internal">Internal</span>`;
 				const link = m.reference_url
 					? `<a href="${m.reference_url}" target="_blank" class="helpbot-card-link">Open reference &rarr;</a>`
 					: "";
 				const preview = (m.content || "").replace(/<[^>]*>/g, "").slice(0, 140);
+				const rootCause = m.root_cause
+					? `<div class="helpbot-card-root-cause"><b>Likely cause:</b> ${frappe.utils.escape_html(m.root_cause)}</div>`
+					: "";
 
 				return `
 					<div class="helpbot-card">
 						<div class="helpbot-card-title">${frappe.utils.escape_html(m.title)} ${badge}</div>
 						${m.module ? `<div class="helpbot-card-module">${m.module}</div>` : ""}
+						${rootCause}
 						<div class="helpbot-card-preview">${preview}${preview.length === 140 ? "..." : ""}</div>
 						${link}
 					</div>
