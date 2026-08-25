@@ -1,6 +1,7 @@
 import frappe
 import urllib.parse
 
+
 # Direct routes for common topics — checked before falling back to search.
 # Add more entries here anytime you notice a query that should route directly.
 TOPIC_URL_MAP = {
@@ -30,6 +31,49 @@ TOPIC_URL_MAP = {
     "journal entry": "https://docs.frappe.io/erpnext/journal-entry",
     "warehouse": "https://docs.frappe.io/erpnext/warehouse",
 }
+
+
+@frappe.whitelist()
+def search_help(query):
+	"""
+	Search Help Article records by title, keywords, content, and error fields.
+	Returns best matches first. If nothing found, the widget will show
+	a fallback link to search ERPNext's official docs site directly.
+	"""
+	query = (query or "").strip()
+	if not query:
+		return []
+
+	like_query = f"%{query}%"
+
+	results = frappe.db.sql(
+		"""
+		SELECT
+			name, title, category, module, content,
+			reference_url, is_official_erpnext_doc,
+			error_message, root_cause,
+			(
+				(error_message LIKE %(like_query)s) * 4 +
+				(title LIKE %(like_query)s) * 3 +
+				(keywords LIKE %(like_query)s) * 2 +
+				(root_cause LIKE %(like_query)s) * 2 +
+				(content LIKE %(like_query)s) * 1
+			) AS relevance
+		FROM `tabHelp Article`
+		WHERE
+			title LIKE %(like_query)s
+			OR keywords LIKE %(like_query)s
+			OR content LIKE %(like_query)s
+			OR error_message LIKE %(like_query)s
+			OR root_cause LIKE %(like_query)s
+		ORDER BY relevance DESC, modified DESC
+		LIMIT 8
+		""",
+		{"like_query": like_query},
+		as_dict=True,
+	)
+
+	return results
 
 
 @frappe.whitelist()
