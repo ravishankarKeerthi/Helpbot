@@ -1,7 +1,6 @@
 import frappe
 import urllib.parse
 
-
 # Direct routes for common topics — checked before falling back to search.
 # Add more entries here anytime you notice a query that should route directly.
 TOPIC_URL_MAP = {
@@ -32,47 +31,81 @@ TOPIC_URL_MAP = {
     "warehouse": "https://docs.frappe.io/erpnext/warehouse",
 }
 
+# Common filler words that shouldn't count as meaningful search terms on their own.
+STOPWORDS = {
+    "a", "an", "the", "is", "are", "was", "were", "in", "on", "at", "to",
+    "of", "for", "and", "or", "if", "no", "not", "i", "it", "how", "what",
+    "why", "do", "does", "did", "my", "me", "with", "from", "this", "that",
+}
+
 
 @frappe.whitelist()
 def search_help(query):
 	"""
-	Search Help Article records by title, keywords, content, and error fields.
-	Returns best matches first. If nothing found, the widget will show
-	a fallback link to search ERPNext's official docs site directly.
+	Search Help Article records by title, keywords, content, error_message,
+	and root_cause — matching on individual words in the query rather than
+	requiring the whole typed phrase to appear verbatim. This lets natural
+	questions like "no camera in sadp" or "weight reversed" match articles
+	that contain those words but not that exact sentence.
 	"""
 	query = (query or "").strip()
 	if not query:
 		return []
 
-	like_query = f"%{query}%"
+	# Break the query into individual meaningful words.
+	raw_words = query.lower().split()
+	words = [w for w in raw_words if w not in STOPWORDS and len(w) > 1]
+
+	# Fallback: if everything got filtered out (e.g. query was just "is"),
+	# use the raw words instead so we still search on something.
+	if not words:
+		words = raw_words
+
+	if not words:
+		return []
+
+	# Build one OR'd relevance-scoring clause per word, then sum them all,
+	# so articles matching more of the typed words rank higher.
+	score_parts = []
+	where_parts = []
+	values = {}
+
+	for i, word in enumerate(words):
+		key = f"w{i}"
+		values[key] = f"%{word}%"
+		score_parts.append(f"""(
+			(error_message LIKE %({key})s) * 4 +
+			(title LIKE %({key})s) * 3 +
+			(keywords LIKE %({key})s) * 2 +
+			(root_cause LIKE %({key})s) * 2 +
+			(content LIKE %({key})s) * 1
+		)""")
+		where_parts.append(f"""(
+			title LIKE %({key})s
+			OR keywords LIKE %({key})s
+			OR content LIKE %({key})s
+			OR error_message LIKE %({key})s
+			OR root_cause LIKE %({key})s
+		)""")
+
+	score_sql = " + ".join(score_parts)
+	where_sql = " OR ".join(where_parts)
 
 	results = frappe.db.sql(
-		"""
+		f"""
 		SELECT
 			name, title, category, module, content,
 			reference_url, is_official_erpnext_doc,
 			error_message, root_cause,
-			(
-				(error_message LIKE %(like_query)s) * 4 +
-				(title LIKE %(like_query)s) * 3 +
-				(keywords LIKE %(like_query)s) * 2 +
-				(root_cause LIKE %(like_query)s) * 2 +
-				(content LIKE %(like_query)s) * 1
-			) AS relevance
+			({score_sql}) AS relevance
 		FROM `tabHelp Article`
-		WHERE
-			title LIKE %(like_query)s
-			OR keywords LIKE %(like_query)s
-			OR content LIKE %(like_query)s
-			OR error_message LIKE %(like_query)s
-			OR root_cause LIKE %(like_query)s
+		WHERE {where_sql}
 		ORDER BY relevance DESC, modified DESC
 		LIMIT 8
 		""",
-		{"like_query": like_query},
+		values,
 		as_dict=True,
 	)
-
 	return results
 
 
@@ -84,10 +117,8 @@ def get_official_docs_search_url(query):
 	search (docs.erpnext.com's own search has no working ?q= URL).
 	"""
 	q = (query or "").strip().lower()
-
 	for topic, url in TOPIC_URL_MAP.items():
 		if topic in q or q in topic:
 			return url
-
 	safe_query = urllib.parse.quote(f"site:docs.erpnext.com {query or ''}")
 	return f"https://www.google.com/search?q={safe_query}"
