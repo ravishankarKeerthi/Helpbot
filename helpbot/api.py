@@ -66,6 +66,9 @@ def search_help(query):
 
 	# Build one OR'd relevance-scoring clause per word, then sum them all,
 	# so articles matching more of the typed words rank higher.
+	# IFNULL(...) is critical here — without it, a NULL field (e.g. an
+	# article with no error_message set) turns the whole SQL sum to NULL,
+	# which silently wipes out the relevance score for otherwise-correct matches.
 	score_parts = []
 	where_parts = []
 	values = {}
@@ -74,11 +77,11 @@ def search_help(query):
 		key = f"w{i}"
 		values[key] = f"%{word}%"
 		score_parts.append(f"""(
-			(error_message LIKE %({key})s) * 4 +
-			(title LIKE %({key})s) * 3 +
-			(keywords LIKE %({key})s) * 2 +
-			(root_cause LIKE %({key})s) * 2 +
-			(content LIKE %({key})s) * 1
+			(IFNULL(error_message, '') LIKE %({key})s) * 4 +
+			(IFNULL(title, '') LIKE %({key})s) * 3 +
+			(IFNULL(keywords, '') LIKE %({key})s) * 2 +
+			(IFNULL(root_cause, '') LIKE %({key})s) * 2 +
+			(IFNULL(content, '') LIKE %({key})s) * 1
 		)""")
 		where_parts.append(f"""(
 			title LIKE %({key})s
@@ -115,6 +118,7 @@ def search_help(query):
 	results = [r for r in results if (r.get("relevance") or 0) >= MIN_RELEVANCE]
 
 	return results
+
 
 @frappe.whitelist()
 def get_official_docs_search_url(query):
