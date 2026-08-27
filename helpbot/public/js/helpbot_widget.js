@@ -163,7 +163,12 @@ frappe.after_ajax(() => {
 				const link = m.reference_url
 					? `<a href="${m.reference_url}" target="_blank" class="helpbot-card-link">Open reference &rarr;</a>`
 					: "";
-				const preview = (m.content || "").replace(/<[^>]*>/g, "").slice(0, 140);
+				const preview = (m.content || "")
+    .replace(/<\/p>|<br\s*\/?>/gi, " ")
+    .replace(/<[^>]*>/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 160);
 				const rootCause = m.root_cause
 					? `<div class="helpbot-card-root-cause"><b>Likely cause:</b> ${frappe.utils.escape_html(m.root_cause)}</div>`
 					: "";
