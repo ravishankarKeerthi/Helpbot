@@ -163,25 +163,29 @@ frappe.after_ajax(() => {
 				const link = m.reference_url
 					? `<a href="${m.reference_url}" target="_blank" class="helpbot-card-link">Open reference &rarr;</a>`
 					: "";
-				const preview = (m.content || "")
-    .replace(/<\/p>|<br\s*\/?>/gi, " ")
-    .replace(/<[^>]*>/g, "")
-    .replace(/\s+/g, " ")
-    .trim()
-    .slice(0, 160);
+								const cleanPreview = (m.content || "")
+					.replace(/<\/p>|<br\s*\/?>/gi, " ")
+					.replace(/<[^>]*>/g, "")
+					.replace(/\s+/g, " ")
+					.trim();
+				const preview = cleanPreview.slice(0, 160);
+				const isTruncated = cleanPreview.length > 160;
 				const rootCause = m.root_cause
 					? `<div class="helpbot-card-root-cause"><b>Likely cause:</b> ${frappe.utils.escape_html(m.root_cause)}</div>`
 					: "";
+				const cardId = "helpbot-card-" + Math.random().toString(36).slice(2, 9);
 
 				return `
 					<div class="helpbot-card">
 						<div class="helpbot-card-title">${frappe.utils.escape_html(m.title)} ${badge}</div>
 						${m.module ? `<div class="helpbot-card-module">${m.module}</div>` : ""}
 						${rootCause}
-						<div class="helpbot-card-preview">${preview}${preview.length === 140 ? "..." : ""}</div>
+						<div class="helpbot-card-preview" id="${cardId}-preview">${preview}${isTruncated ? "..." : ""}</div>
+						<div class="helpbot-card-full" id="${cardId}-full" style="display:none;">${m.content || ""}</div>
+						${isTruncated ? `<a href="#" class="helpbot-card-link helpbot-expand-link" data-target="${cardId}">Read full guide &rarr;</a>` : ""}
 						${link}
 					</div>
-				`;
+				`;				`;
 			})
 			.join("");
 
