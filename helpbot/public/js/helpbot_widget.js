@@ -131,8 +131,21 @@ frappe.after_ajax(() => {
 			},
 			error: function () {
 				typingEl.remove();
-				appendBotBubble(`<div>Something went wrong searching. Try again in a moment.</div>`);
-			},
+				const bubbleEl = appendBotBubble(`<div class="helpbot-cards">${cardsHtml}</div>`);
+		bubbleEl.querySelectorAll(".helpbot-expand-link").forEach((el) => {
+			el.addEventListener("click", (e) => {
+				e.preventDefault();
+				const id = el.dataset.target;
+				const previewEl = bubbleEl.querySelector(`#${id}-preview`);
+				const fullEl = bubbleEl.querySelector(`#${id}-full`);
+				const expanded = fullEl.style.display !== "none";
+				fullEl.style.display = expanded ? "none" : "block";
+				previewEl.style.display = expanded ? "block" : "none";
+				el.textContent = expanded ? "Read full guide →" : "Show less ↑";
+				scrollToBottom();
+			});
+		});
+	}			},
 		});
 	}
 
