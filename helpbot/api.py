@@ -106,8 +106,15 @@ def search_help(query):
 		values,
 		as_dict=True,
 	)
-	return results
 
+	# Filter out weak matches (e.g. a single word only found buried in
+	# content) so genuinely unrelated articles don't block the fallback
+	# to official ERPNext docs. Require at least a title or keyword hit,
+	# or two-or-more weaker matches combined.
+	MIN_RELEVANCE = 3
+	results = [r for r in results if (r.get("relevance") or 0) >= MIN_RELEVANCE]
+
+	return results
 
 @frappe.whitelist()
 def get_official_docs_search_url(query):
