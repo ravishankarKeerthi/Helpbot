@@ -131,21 +131,8 @@ frappe.after_ajax(() => {
 			},
 			error: function () {
 				typingEl.remove();
-				const bubbleEl = appendBotBubble(`<div class="helpbot-cards">${cardsHtml}</div>`);
-		bubbleEl.querySelectorAll(".helpbot-expand-link").forEach((el) => {
-			el.addEventListener("click", (e) => {
-				e.preventDefault();
-				const id = el.dataset.target;
-				const previewEl = bubbleEl.querySelector(`#${id}-preview`);
-				const fullEl = bubbleEl.querySelector(`#${id}-full`);
-				const expanded = fullEl.style.display !== "none";
-				fullEl.style.display = expanded ? "none" : "block";
-				previewEl.style.display = expanded ? "block" : "none";
-				el.textContent = expanded ? "Read full guide →" : "Show less ↑";
-				scrollToBottom();
-			});
-		});
-	}			},
+				appendBotBubble(`<div>Sorry, something went wrong while searching. Please try again.</div>`);
+			},
 		});
 	}
 
@@ -176,7 +163,7 @@ frappe.after_ajax(() => {
 				const link = m.reference_url
 					? `<a href="${m.reference_url}" target="_blank" class="helpbot-card-link">Open reference &rarr;</a>`
 					: "";
-								const cleanPreview = (m.content || "")
+				const cleanPreview = (m.content || "")
 					.replace(/<\/p>|<br\s*\/?>/gi, " ")
 					.replace(/<[^>]*>/g, "")
 					.replace(/\s+/g, " ")
@@ -198,11 +185,25 @@ frappe.after_ajax(() => {
 						${isTruncated ? `<a href="#" class="helpbot-card-link helpbot-expand-link" data-target="${cardId}">Read full guide &rarr;</a>` : ""}
 						${link}
 					</div>
-				`;				`;
+				`;
 			})
 			.join("");
 
-		appendBotBubble(`<div class="helpbot-cards">${cardsHtml}</div>`);
+		const bubbleEl = appendBotBubble(`<div class="helpbot-cards">${cardsHtml}</div>`);
+
+		bubbleEl.querySelectorAll(".helpbot-expand-link").forEach((el) => {
+			el.addEventListener("click", (e) => {
+				e.preventDefault();
+				const id = el.dataset.target;
+				const previewEl = bubbleEl.querySelector(`#${id}-preview`);
+				const fullEl = bubbleEl.querySelector(`#${id}-full`);
+				const expanded = fullEl.style.display !== "none";
+				fullEl.style.display = expanded ? "none" : "block";
+				previewEl.style.display = expanded ? "block" : "none";
+				el.textContent = expanded ? "Read full guide →" : "Show less ↑";
+				scrollToBottom();
+			});
+		});
 	}
 
 	sendBtn.addEventListener("click", handleSend);
