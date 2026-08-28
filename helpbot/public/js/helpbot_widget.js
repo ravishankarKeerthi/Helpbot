@@ -131,7 +131,7 @@ frappe.after_ajax(() => {
 			},
 			error: function () {
 				typingEl.remove();
-				appendBotBubble(`<div>Sorry, something went wrong while searching. Please try again.</div>`);
+				appendBotBubble(`<div>Something went wrong searching. Try again in a moment.</div>`);
 			},
 		});
 	}
@@ -163,13 +163,13 @@ frappe.after_ajax(() => {
 				const link = m.reference_url
 					? `<a href="${m.reference_url}" target="_blank" class="helpbot-card-link">Open reference &rarr;</a>`
 					: "";
-				const cleanPreview = (m.content || "")
+				const cleanContent = (m.content || "")
 					.replace(/<\/p>|<br\s*\/?>/gi, " ")
 					.replace(/<[^>]*>/g, "")
 					.replace(/\s+/g, " ")
 					.trim();
-				const preview = cleanPreview.slice(0, 160);
-				const isTruncated = cleanPreview.length > 160;
+				const preview = cleanContent.slice(0, 160);
+				const isTruncated = cleanContent.length > 160;
 				const rootCause = m.root_cause
 					? `<div class="helpbot-card-root-cause"><b>Likely cause:</b> ${frappe.utils.escape_html(m.root_cause)}</div>`
 					: "";
